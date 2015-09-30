@@ -23,3 +23,26 @@ void init_all_events(){
   all_events[2].historic_time =     "";
   
 }
+
+char* itoa(int num){
+  
+  static char buff[20] = {};
+  int i = 0;
+  int temp_num = num;
+  int length = 0;
+  
+  //count how many times you can divide by 10 to get the lenght
+  if (num >= 0){
+    while(temp_num){
+      temp_num /= 10;
+      length++;
+    }
+  }
+  for(i = 0; i < length; i++){
+    buff[(length-1)-i] = '0'+(num % 10);
+    num /= 10;
+  }
+  buff[i]='\0';
+  
+  return buff;
+}

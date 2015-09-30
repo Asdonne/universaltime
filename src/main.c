@@ -11,8 +11,12 @@ static TextLayer *s_event_layer;
 static void update_time(){
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
+  int elapsed_minutes = 0;
+  char *minutes_buffer = NULL; //buffer for elapsed minutes
+  static char buffer[] = "00:00"; //buffer for current time
   
-  static char buffer[] = "00:00";
+  elapsed_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
+  minutes_buffer = itoa(elapsed_minutes);
   
   if(clock_is_24h_style() == true){
     strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
@@ -21,6 +25,7 @@ static void update_time(){
   }
   
   text_layer_set_text(s_time_layer, buffer);
+  text_layer_set_text(s_event_layer, minutes_buffer);
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
@@ -29,17 +34,24 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
 
 static void main_window_load(Window *window){
   //create time text layer
-  //s_time_layer = text_layer_create(GRect(0, 55, 144, 50));
   s_time_layer = text_layer_create(GRect(0, 0, 144, 50));
-  text_layer_set_background_color(s_time_layer, GColorClear);
-  text_layer_set_text_color(s_time_layer, GColorBlack);
-  //text_layer_set_text(s_time_layer, "00:00");
+  s_event_layer = text_layer_create(GRect(0, 50, 144, 50));
+  
+  text_layer_set_background_color(s_time_layer, GColorBlack);
+  text_layer_set_background_color(s_event_layer, GColorBlack);
+  
+  text_layer_set_text_color(s_time_layer, GColorClear);
+  text_layer_set_text_color(s_event_layer, GColorClear);
   
   text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_font(s_event_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
-  //text_layer_set_text_alignment(s_time_layer, GTextAlignmentLeft);
+  text_layer_set_text_alignment(s_event_layer, GTextAlignmentCenter);
+  
   //add layer to as child to root
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_event_layer));
 }
 static void main_window_unload(Window *window){
   

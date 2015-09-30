@@ -7,3 +7,5 @@ typedef struct {
 }event;  
 
 void init_all_events();
+
+char* itoa(int num);
