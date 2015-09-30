@@ -1,7 +1,10 @@
 #include <pebble.h>
-
+#include "UniverseTimeLine.h"
+  
 static Window *s_my_window;
+
 static TextLayer *s_time_layer;
+static TextLayer *s_event_layer;
 
 
 
@@ -26,14 +29,15 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
 
 static void main_window_load(Window *window){
   //create time text layer
-  s_time_layer = text_layer_create(GRect(0, 55, 144, 50));
+  //s_time_layer = text_layer_create(GRect(0, 55, 144, 50));
+  s_time_layer = text_layer_create(GRect(0, 0, 144, 50));
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_text_color(s_time_layer, GColorBlack);
   //text_layer_set_text(s_time_layer, "00:00");
   
   text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  //text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentLeft);
+  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
+  //text_layer_set_text_alignment(s_time_layer, GTextAlignmentLeft);
   //add layer to as child to root
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
 }
@@ -55,6 +59,9 @@ void handle_init(void) {
   
   //text_layer = text_layer_create(GRect(0, 0, 144, 20));
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
+  
+  //create all events
+  init_all_events();
 }
 
 void handle_deinit(void) {
