@@ -1,22 +1,95 @@
 #include <pebble.h>
-#include "UniverseTimeLine.h"
+
+typedef struct {
+  int event_minutes;
+  char* event_message;
+  char* historic_time;
+}event;  
   
 static Window *s_my_window;
-
 static TextLayer *s_time_layer;
 static TextLayer *s_event_layer;
+static TextLayer *s_age_layer;
+
+event all_events[5];
 
 
+void init_all_events(){
+  
+  all_events[0].event_minutes = 0;
+  all_events[0].event_message =  "";
+  all_events[0].historic_time =  "";
+  
+  all_events[1].event_minutes = 1;
+  all_events[1].event_message =  "Birth of the Universe";
+  all_events[1].historic_time =  "13000 MYA";
+  
+  all_events[2].event_minutes = 20; //501;
+  all_events[2].event_message =  "Andromeda Galaxy formed from a collision";
+  all_events[2].historic_time =  "9000 MYA";
+  
+  all_events[3].event_minutes = 60;
+  all_events[3].event_message =   "Formation of the solar system";
+  all_events[3].historic_time =   "4600 MYA";
+   
+    
+  all_events[4].event_minutes = 1441;
+  all_events[4].event_message =     "present time";
+  all_events[4].historic_time =     "now";
+  
+}
+//IF elapsed_minutes is greater then the time needed for the next event, incremet the next event
+static bool update_counter(int elapsed_minutes, int index){
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "if (%d >= %d)", elapsed_minutes, all_events[index+1].event_minutes);
+  if( elapsed_minutes >= all_events[index+1].event_minutes && index < 4){
+    return true;
+  }
+  else{
+    return false;    
+    }
+}
+
+static void update_events()
+{
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+  
+  int elapsed_minutes = 0;
+  //int current_event_minutes = 0; 
+  static int s_current_event = 0;
+  event* current_event = NULL;
+  event* next_event = NULL;
+  
+  char *event_buffer = NULL; //buffer for elapsed minutes
+  char *age_buffer = NULL;
+  
+  elapsed_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
+  
+  current_event = &all_events[s_current_event];
+  next_event = &all_events[s_current_event+1];
+  
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "current_event->event_minutes = %d)", current_event->event_minutes);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "next_event->event_minutes = %d)", next_event->event_minutes);
+  
+  while(update_counter(elapsed_minutes, s_current_event)){
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "\tupdated s_current_event");
+    s_current_event++;
+  }
+  
+  event_buffer = all_events[s_current_event].event_message;
+  age_buffer = all_events[s_current_event].historic_time;
+  
+  text_layer_set_text(s_event_layer, event_buffer);
+  text_layer_set_text(s_age_layer, age_buffer);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "\n");
+}
 
 static void update_time(){
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
-  int elapsed_minutes = 0;
-  char *minutes_buffer = NULL; //buffer for elapsed minutes
   static char buffer[] = "00:00"; //buffer for current time
   
-  elapsed_minutes = tick_time->tm_hour * 60 + tick_time->tm_min;
-  minutes_buffer = itoa(elapsed_minutes);
+ 
   
   if(clock_is_24h_style() == true){
     strftime(buffer, sizeof("00:00"), "%H:%M", tick_time);
@@ -25,39 +98,46 @@ static void update_time(){
   }
   
   text_layer_set_text(s_time_layer, buffer);
-  text_layer_set_text(s_event_layer, minutes_buffer);
+  
+  update_events();
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed){
   update_time();
 }
 
+static void init_layer(TextLayer *layer, Window *window){
+  text_layer_set_background_color(layer, GColorBlack);
+  text_layer_set_text_color(layer, GColorClear);
+  text_layer_set_text_alignment(layer, GTextAlignmentCenter);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(layer));
+}
+
 static void main_window_load(Window *window){
   //create time text layer
   s_time_layer = text_layer_create(GRect(0, 0, 144, 50));
   s_event_layer = text_layer_create(GRect(0, 50, 144, 50));
-  
-  text_layer_set_background_color(s_time_layer, GColorBlack);
-  text_layer_set_background_color(s_event_layer, GColorBlack);
-  
-  text_layer_set_text_color(s_time_layer, GColorClear);
-  text_layer_set_text_color(s_event_layer, GColorClear);
+  s_age_layer = text_layer_create(GRect(0, 100, 144, 68));
   
   text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
-  text_layer_set_font(s_event_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+  text_layer_set_font(s_event_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_font(s_age_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
   
-  text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
-  text_layer_set_text_alignment(s_event_layer, GTextAlignmentCenter);
-  
-  //add layer to as child to root
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_time_layer));
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_event_layer));
+  init_layer(s_time_layer, window);
+  init_layer(s_event_layer, window);
+  init_layer(s_age_layer, window); 
 }
+
+
+
 static void main_window_unload(Window *window){
   
 }
 
 void handle_init(void) {
+  //create all events
+  init_all_events();
+  
   //Create window and assign it to 
   s_my_window = window_create();
 
@@ -72,8 +152,7 @@ void handle_init(void) {
   //text_layer = text_layer_create(GRect(0, 0, 144, 20));
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   
-  //create all events
-  init_all_events();
+  
 }
 
 void handle_deinit(void) {
