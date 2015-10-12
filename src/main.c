@@ -11,37 +11,64 @@ static TextLayer *s_time_layer;
 static TextLayer *s_event_layer;
 static TextLayer *s_age_layer;
 
-event all_events[5];
+#define NUM_EVENTS 5
+
+event all_events[NUM_EVENTS];
 
 
 void init_all_events(){
   
   all_events[0].event_minutes = 0;
-  all_events[0].event_message =  "";
-  all_events[0].historic_time =  "";
+  all_events[0].event_message =  "Solar System Starts to Form";
+  all_events[0].historic_time =  "4600 MYA";
   
-  all_events[1].event_minutes = 1;
-  all_events[1].event_message =  "Birth of the Universe";
-  all_events[1].historic_time =  "13000 MYA";
+  all_events[1].event_minutes = 18;
+  all_events[1].event_message =  "Sun Ignites into an Main Sequence Star";
+  all_events[1].historic_time =  "4550 MYA";
   
-  all_events[2].event_minutes = 20; //501;
-  all_events[2].event_message =  "Andromeda Galaxy formed from a collision";
-  all_events[2].historic_time =  "9000 MYA";
+  all_events[2].event_minutes = 21; //501;
+  all_events[2].event_message =  "Left over dust blown away by the Sun";
+  all_events[2].historic_time =  "4540 MYA";
   
-  all_events[3].event_minutes = 60;
-  all_events[3].event_message =   "Formation of the solar system";
-  all_events[3].historic_time =   "4600 MYA";
-   
+  all_events[3].event_minutes = 34;
+  all_events[3].event_message =   "Moons forms very closer to Earth.";
+  all_events[3].historic_time =   "4500 MYA";
+  
+  all_events[4].event_minutes = 128;
+  all_events[4].event_message =     "Fist Oceans appear";
+  all_events[4].historic_time =     "4200 MYA"; 
     
-  all_events[4].event_minutes = 1441;
-  all_events[4].event_message =     "present time";
-  all_events[4].historic_time =     "now";
+  all_events[4].event_minutes = 143;
+  all_events[4].event_message =     "Late Heavy Bombardment Starts";
+  all_events[4].historic_time =     "4100 MYA";
+
+  all_events[4].event_minutes = 158;
+  all_events[4].event_message =     "First Singe Cell life appears";
+  all_events[4].historic_time =     "3900 MYA";
+
+  all_events[4].event_minutes = 252;
+  all_events[4].event_message =     "End of Late Heavy Bombardment";
+  all_events[4].historic_time =     "3800 MYA";
+
+  all_events[4].event_minutes = 346;
+  all_events[4].event_message =     "Life starts basic process of photosynthesis";
+  all_events[4].historic_time =     "3500 MYA";
+
+  all_events[4].event_minutes = 502;
+  all_events[4].event_message =     "Cynobacteria start producing Oxygen";
+  all_events[4].historic_time = "3000 MYA"
   
+  /**
+  all_events[4].event_minutes = ;
+  all_events[4].event_message =     "";
+  all_events[4].historic_time = "" 
+  */
+
 }
 //IF elapsed_minutes is greater then the time needed for the next event, incremet the next event
 static bool update_counter(int elapsed_minutes, int index){
   APP_LOG(APP_LOG_LEVEL_DEBUG, "if (%d >= %d)", elapsed_minutes, all_events[index+1].event_minutes);
-  if( elapsed_minutes >= all_events[index+1].event_minutes && index < 4){
+  if( elapsed_minutes >= all_events[index+1].event_minutes && index < NUM_EVENTS-1){
     return true;
   }
   else{
